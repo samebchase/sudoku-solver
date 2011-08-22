@@ -1,20 +1,11 @@
-(setq grid (make-array '(9 9)))
+(defvar grid (make-array '(9 9)))
 
-(let ((in (open "puzzle.txt")))
+(let ((in (open "../test/puzzle.txt")))
   (when in
     (loop for line = (read-line in nil) while line
-       for i upto 8
-       do
-	 (loop for char across line for j upto 8
-	    do
+       for i upto 8 do
+	 (loop for char across line for j upto 8 do
 	      (setf (aref grid i j) (parse-integer (coerce (list char) 'string)))))
     (close in)))
 
 (print grid)
-
-
-
-
-
-
-    
