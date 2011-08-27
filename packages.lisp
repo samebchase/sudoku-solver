@@ -1,7 +1,3 @@
-(ql:quickload 'iterate)
-
 (in-package :cl-user)
 
-(defpackage :sudoku-solver
-  (:use common-lisp)
-  (:use iterate))
+(defpackage :sudoku-solver (:use :cl :iterate))
