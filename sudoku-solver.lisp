@@ -6,7 +6,7 @@
   (when in (loop for line = (read-line in nil) while line
 	      for i upto 8 do
 		(loop for char across line for j upto 8 do
-		     (setf (aref grid i j) (parse-integer (coerce (list char) 'string)))))
+		     (setf (aref grid i j) (digit-char-p char))))
 	(close in)))
 
 (defun filled-elements-row (i)
@@ -35,7 +35,7 @@
   (let* ((start-cell (subgrid-top-left-corner-cell i j))
 	 (x-index (car start-cell))
 	 (y-index (cdr start-cell)))
-    (iter outer (iterate:for i to 2)
+    (iter outer (for i to 2)
 	  (iter (for j to 2) (for elt = (aref grid (+ x-index i) (+ y-index j)))
 		(when (/= elt 0)
 		  (in
