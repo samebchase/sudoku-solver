@@ -42,9 +42,7 @@
 		  (in outer (collect elt)))))))
 
 (defun grid-to-list ()
-  (iter outer (for i below 9)
-	(iter (for j below 9)
-	      (in outer (collect (aref grid i j))))))
+  (with-every-cell-iterate (in outer (collect (aref grid i j)))))
 
 (defvar 1-to-9 (loop for i from 1 upto 9 collect i))
 
@@ -61,27 +59,13 @@
       (format t "~a " (aref grid i j)))))
 
 (defun all-possibilites () 
-  (dotimes (i 9)
-    (dotimes (j 9)
-      (cell-possibilities i j))))
+  (with-every-cell-iterate (collect (cell-possibilities i j))))
 
 (defun use-brute-force ()
   (loop for k upto 50 do
        (loop for i upto 8 do
 	    (loop for j upto 8 for lst = (cell-possibilities i j)
 	       when (= (length lst) 1) do (setf (aref grid i j) (car lst))))))
-
-(defun row-sum (i)
-  (loop for j in (filled-elements-row i) sum j))
-
-(defun col-sum (j)
-  (loop for i in (filled-elements-col j) sum i))
-
-(defun grid-sum (i j)
-  (let* ((cell (subgrid-top-left-corner-cell i j))
-	 (x-coord (car cell))
-	 (y-coord (cdr cell)))
-    (iter (for i from 3 to 6 by 3))))
 
 (defun unsolved-cells ()
   (with-every-cell-iterate (in outer (when (= (aref grid i j) 0) (collect (cons i j))))))
@@ -105,7 +89,6 @@
 	(iter (for j to 8)
 	      (in outer ,body))))
   
-
 ;; (defun smarter-method ()
 ;;   (let* ((unsolved (unsolved-cells)))
 ;;     (when (> (length unsolved) 0)
