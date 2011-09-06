@@ -61,12 +61,6 @@
 (defun all-possibilites () 
   (with-every-cell-iterate (collect (cell-possibilities i j))))
 
-(defun use-brute-force ()
-  (loop for k upto 50 do
-       (loop for i upto 8 do
-	    (loop for j upto 8 for lst = (cell-possibilities i j)
-	       when (= (length lst) 1) do (setf (aref grid i j) (car lst))))))
-
 (defun unsolved-cells ()
   (with-every-cell-iterate (in outer (when (= (aref grid i j) 0) (collect (cons i j))))))
 
@@ -78,17 +72,17 @@
     (set-difference (list (+ row-index 0) (+ row-index 1) (+ row-index 2))
 		    (list row-index))))
 
-
-(defmacro with-every-cell (body)
-  `(dotimes (i 9)
-    (dotimes (j 9)
-      ,body)))
-
 (defmacro with-every-cell-iterate (body)
   `(iter outer (for i to 8)
 	(iter (for j to 8)
 	      (in outer ,body))))
-  
+
+(defun use-brute-force ()
+  (loop for k upto 50 do
+       (loop for i upto 8 do
+	    (loop for j upto 8 for lst = (cell-possibilities i j)
+	       when (= (length lst) 1) do (setf (aref grid i j) (car lst))))))
+
 ;; (defun smarter-method ()
 ;;   (let* ((unsolved (unsolved-cells)))
 ;;     (when (> (length unsolved) 0)
