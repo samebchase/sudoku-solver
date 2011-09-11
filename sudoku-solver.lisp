@@ -42,7 +42,7 @@
 		  (in outer (collect elt)))))))
 
 (defun grid-to-list ()
-  (with-every-cell-iterate (in outer (collect (aref grid i j)))))
+  (with-every-cell (in outer (collect (aref grid i j)))))
 
 (defvar 1-to-9 (loop for i from 1 upto 9 collect i))
 
@@ -59,20 +59,28 @@
       (format t "~a " (aref grid i j)))))
 
 (defun all-possibilites () 
-  (with-every-cell-iterate (collect (cell-possibilities i j))))
+  (with-every-cell (collect (cell-possibilities i j))))
 
 (defun unsolved-cells ()
-  (with-every-cell-iterate (in outer (when (= (aref grid i j) 0) (collect (cons i j))))))
+  (with-every-cell (in outer (when (= (aref grid i j) 0) (collect (cons i j))))))
 
 (defun filledp ()
   (if (= 0 (length (unsolved-cells))) t nil))
 
-(defun space-elimination-row (i j)
-  (let ((row-index (car (subgrid-top-left-corner-cell i j))))
-    (set-difference (list (+ row-index 0) (+ row-index 1) (+ row-index 2))
-		    (list row-index))))
+;; see if there are any repeated elements in adjacent rows 
 
-(defmacro with-every-cell-iterate (body)
+;; other rows in subgrid
+;; find subgrid corner
+;; find the other two rows
+
+(defun repeated-elements-adjacent-row (i j)
+  (let* ((corner-row-index (car (subgrid-top-left-corner-cell i j)))
+	 (subgrid-relative-row (- i corner-row-index))
+	 (other-relative-rows (remove subgrid-relative-row '(0 1 2))))
+    (intersection (filled-elements-row (+ corner-row-index (car other-relative-rows)))
+		  (filled-elements-row (+ corner-row-index (cadr other-relative-rows))))))
+
+(defmacro with-every-cell (body)
   `(iter outer (for i to 8)
 	(iter (for j to 8)
 	      (in outer ,body))))
