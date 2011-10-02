@@ -22,7 +22,7 @@
 	 when (/= elt 0) collect elt) nil))
 
 (defun subgrid-top-left-corner-cell (i j)
-    (list (- i (rem i 3)) (- j (rem j 3))))
+    (cons (- i (rem i 3)) (- j (rem j 3))))
 
 (defun filled-elements-subgrid (i j)
   (let* ((start-cell (subgrid-top-left-corner-cell i j))
