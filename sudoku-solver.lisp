@@ -21,6 +21,9 @@
 ;; 			  ((eq 'column component) `(aref grid k ,var))))
 ;; (AREF GRID K 3)
 
+;; filled-elements-row and filled-elements-col should be implemented
+;; using with-grid-component as appropriate
+
 (defun filled-elements-row (grid i)
   (if (and (<= i 8) (>= i 0))
       (loop for k upto 8
