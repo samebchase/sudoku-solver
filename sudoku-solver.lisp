@@ -11,7 +11,8 @@
 
 (defmacro with-grid-component (component var)
   `(loop for k upto 8
-      for elt = ,(if `(eq row ,component) `(aref grid ,var k))		     
+      for elt = ,(cond (`(eq row ,component) `(aref grid ,var k))
+		       (`(eq column ,component) `(aref grid k ,var)))  
       when (/= elt 0) collect elt))
 
 ;; This works
