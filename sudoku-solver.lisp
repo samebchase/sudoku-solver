@@ -7,7 +7,7 @@
        for i to 9 do
 	 (loop for char across line for j upto 8 do
 	      (setf (aref grid i j) (digit-char-p char)))))
-    grid))
+  grid))
 
 (defmacro with-grid-component (component var)
   `(loop for k upto 8
