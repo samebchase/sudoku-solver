@@ -7,14 +7,8 @@
   (with-open-file (stream path-str)
     (loop for line = (read-line stream nil) while line collect line)))
 
-;; (defun group-into (size list)
-;;   (cond ((< size 0) nil)
-;; 	((= size 0) list)
-;;         ((= (length list) 0) ())
-;; 	((> (length list) 0) (cons (take size list)
-;; 			      (group-into size (nthcdr size list))))))
-
 (defun group-into (n list)
+;; Thanks to stassats for replacing an ugly recursive version with this one
   (loop while list collect
         (loop repeat n while list
               collect (pop list))))
@@ -29,23 +23,22 @@
 (defmethod row-strings-to-puzzle ((sudoku-puzzle sudoku-puzzle) list)
   (loop for i to 8 for string in list do
        (loop for j to 8 for char across string do
-	    (setf (aref (grid sudoku-puzzle) i j) (digit-char-p char)))))  
+	    (setf (aref (grid sudoku-puzzle) i j) (digit-char-p char)))))k
 
-(loop for string-list in
-     (group-into 9 (remove-if #'first-char-alphap (read-lines "/home/samuel/projects/sudoku-solver/src/lisp/sudoku.txt")))
-     for puzzle = (make-instance 'sudoku-puzzle) do (row-strings-to-puzzle puzzle string-list)
-     collect puzzle)
+(defvar *path* "/home/samuel/projects/sudoku-solver/src/lisp/sudoku.txt")
+
+(defmethod print-puzzle ((sudoku-puzzle sudoku-puzzle))
+  (dotimes (i 9)
+    (format t "~%")
+    (dotimes (j 9)
+      (format t "~a " (aref (grid sudoku-puzzle) i j))))
+  (format t "~%"))
+
+;; (mapcar #'print-puzzle (loop for string-list in (group-into 9 (remove-if #'first-char-alphap (read-lines *path*)))
+;; 	for puzzle = (make-instance 'sudoku-puzzle) do (row-strings-to-puzzle puzzle string-list)
+;; 	collect puzzle))
 
 ;; collect lines
-
-;; (defun read-puzzles-from-file (path-str)
-;;   (let ((grid (make-array '(9 9) :initial-element 0)))
-;;   (with-open-file (stream path-str)
-;;     (loop for line = (read-line stream nil) while line
-;;        for i to 9 do
-;; 	 (loop for char across line for j upto 8 do
-;; 	      (setf (aref grid i j) (digit-char-p char)))))
-;;   grid))
 
 ;; (defmacro with-grid-component (component var)
 ;;   `(loop for k upto 8
@@ -94,12 +87,6 @@
 ;; 		  (remove-duplicates (append (filled-elements-subgrid grid i j)
 ;; 					     (filled-elements-col grid j)
 ;; 					     (filled-elements-row grid i)))))
-
-;; (defun print-grid (grid)
-;;   (dotimes (i 9)
-;;     (format t "~%")
-;;     (dotimes (j 9)
-;;       (format t "~a " (aref grid i j)))))
 
 ;; (defun all-possibilities (grid) 
 ;;   (with-every-cell (collect (cell-possibilities grid i j))))
