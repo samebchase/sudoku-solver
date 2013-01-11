@@ -1,5 +1,8 @@
 (in-package :sudoku-solver)
 
+(defvar *path* "/home/samuel/projects/sudoku-solver/src/lisp/sudoku.txt")
+(defconstant +values+ (alexandria:iota 9 :start 1))
+
 (defclass sudoku-puzzle ()
   ((grid :accessor grid :initform (make-array '(9 9)))))
 
@@ -8,14 +11,11 @@
     (loop for line = (read-line stream nil) while line collect line)))
 
 (defun group-into (n list)
-;; Thanks to stassats for replacing an ugly recursive version with this one
-  (loop while list collect
+;; Thanks to stassats from #lisp for replacing an ugly recursive version with this one
+  (if (<= n 0) list
+      (loop while list collect
         (loop repeat n while list
-              collect (pop list))))
-
-(defun take (size list)
-  (loop for i to size for elt in list 
-     while (< i size) collect elt))
+	   collect (pop list)))))
 
 (defun first-char-alphap (string)
   (alpha-char-p (aref string 0)))
@@ -23,9 +23,7 @@
 (defmethod row-strings-to-puzzle ((sudoku-puzzle sudoku-puzzle) list)
   (loop for i to 8 for string in list do
        (loop for j to 8 for char across string do
-	    (setf (aref (grid sudoku-puzzle) i j) (digit-char-p char)))))k
-
-(defvar *path* "/home/samuel/projects/sudoku-solver/src/lisp/sudoku.txt")
+	    (setf (aref (grid sudoku-puzzle) i j) (digit-char-p char)))))
 
 (defmethod print-puzzle ((sudoku-puzzle sudoku-puzzle))
   (dotimes (i 9)
@@ -34,11 +32,32 @@
       (format t "~a " (aref (grid sudoku-puzzle) i j))))
   (format t "~%"))
 
-;; (mapcar #'print-puzzle (loop for string-list in (group-into 9 (remove-if #'first-char-alphap (read-lines *path*)))
-;; 	for puzzle = (make-instance 'sudoku-puzzle) do (row-strings-to-puzzle puzzle string-list)
-;; 	collect puzzle))
+(defmethod solve ((sudoku-puzzle sudoku-puzzle))
+  (grid sudoku-puzzle))
 
-;; collect lines
+(defmethod row ((sudoku-puzzle sudoku-puzzle) row)
+  (loop for i upto 8 collect (aref (grid sudoku-puzzle) 0 i)))
+
+(defmethod column ((sudoku-puzzle sudoku-puzzle) col)
+  (loop for i upto 8 collect (aref (grid sudoku-puzzle) i 0)))
+
+(defmethod subgrid ((sudoku-puzzle sudoku-puzzle) i j)
+  (let* ((corner-cell (subgrid-corner-cell i j))
+	 (x (car corner-cell))
+	 (y (cdr corner-cell)))
+    (iter outer (for i to 2)
+	  (iter (for j to 2) (for elt = (aref (grid sudoku-puzzle) (+ x i) (+ y j)))
+		(in outer (collect elt))))))
+    
+(defun filled-elements (list)
+  (remove-if #'zerop list))
+
+(defun subgrid-corner-cell (row col)
+  (cons (- row (rem row 3)) (- col (rem col 3))))
+
+(mapcar #'solve (loop for string-list in (group-into 9 (remove-if #'first-char-alphap (read-lines *path*)))
+	for puzzle = (make-instance 'sudoku-puzzle) do (row-strings-to-puzzle puzzle string-list)
+	collect puzzle))
 
 ;; (defmacro with-grid-component (component var)
 ;;   `(loop for k upto 8
@@ -67,6 +86,7 @@
 ;; 	 for elt = (aref grid k j)
 ;; 	 when (/= elt 0) collect elt) nil))
 
+
 ;; (defun filled-elements-subgrid (grid i j)
 ;;   (let* ((start-cell (subgrid-top-left-corner-cell grid i j))
 ;; 	 (x-index (car start-cell))
@@ -75,9 +95,6 @@
 ;; 	  (iter (for j to 2) (for elt = (aref grid (+ x-index i) (+ y-index j)))
 ;; 		(when (/= elt 0)
 ;; 		  (in outer (collect elt)))))))
-
-;; (defun subgrid-top-left-corner-cell (grid i j)
-;;   (cons (- i (rem i 3)) (- j (rem j 3))))
 
 ;; (defun grid-to-list (grid)
 ;;   (with-every-cell (in outer (collect (aref grid i j)))))
