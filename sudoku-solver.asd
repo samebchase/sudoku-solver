@@ -11,6 +11,7 @@
   :components
   ((:file "packages")
    (:file "sudoku-puzzle" :depends-on ("packages"))
-   (:file "file-input" :depends-on ("packages" "sudoku-puzzle"))
-   (:file "sudoku-solver" :depends-on ("file-input")))
+   (:file "file-input" :depends-on ("sudoku-puzzle"))
+   (:file "solver-utils" :depends-on ("sudoku-puzzle"))
+   (:file "sudoku-solver" :depends-on ("file-input" "solver-utils")))
   :depends-on (iterate alexandria))
