@@ -1,22 +1,7 @@
 (in-package :sudoku-solver)
 
+(defvar *values* (alexandria:iota 9 :start 1))
 (defvar *path* "/home/samuel/projects/sudoku-solver/src/lisp/sudoku.txt")
-(defconstant +values+ (alexandria:iota 9 :start 1))
-
-(defclass sudoku-puzzle ()
-  ((grid :accessor grid :initform (make-array '(9 9)))))
-
-(defun read-lines (path-str)
-  (with-open-file (stream path-str)
-    (loop for line = (read-line stream nil) while line collect line)))
-
-(defun first-char-alphap (string)
-  (alpha-char-p (aref string 0)))
-
-(defmethod row-strings-to-puzzle ((sudoku-puzzle sudoku-puzzle) list)
-  (loop for i to 8 for string in list do
-       (loop for j to 8 for char across string do
-	    (setf (aref (grid sudoku-puzzle) i j) (digit-char-p char)))))
 
 (defmethod print-puzzle ((sudoku-puzzle sudoku-puzzle))
   (dotimes (i 9)
@@ -26,7 +11,8 @@
   (format t "~%"))
 
 (defun group-into (n list)
-;; Thanks to stassats from #lisp for replacing an ugly recursive version with this one
+;; Thanks to stassats from #lisp for replacing an ugly recursive
+;; version with this one
   (if (<= n 0) list
       (loop while list collect
         (loop repeat n while list
@@ -54,6 +40,11 @@
 
 (defun filled-elements (list)
   (remove-if #'zerop list))
+
+(defmethod populate-unsolved-cells ((sudoku-puzzle sudoku-puzzle))
+  (with-every-cell
+      (when (zerop (aref (grid sudoku-puzzle) i j))
+	(setf (gethash (cons i j) (unsolved-cells sudoku-puzzle)) (cons i j)))))
 
 ;; (defun unsolved-cells (grid)
 ;;   (with-every-cell (in outer (when (= (aref grid i j) 0) (collect (cons i j))))))
@@ -92,10 +83,6 @@
 ;; (defun all-possibilities (grid) 
 ;;   (with-every-cell (collect (cell-possibilities grid i j))))
 
-;; (defmacro with-every-cell (body)
-;;   `(iter outer (for i to 8)
-;; 	(iter (for j to 8)
-;; 	      (in outer ,body))))
 
 ;; (defun all-subgrids (grid)
 ;;   (iter outer (for i to 6 by 3)

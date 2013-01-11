@@ -1,7 +1,5 @@
 ;;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Base: 10 -*-
 
-;;(ql:quickload 'iterate)
-
 (defpackage #:sudoku-solver-system (:use :cl :asdf))
 
 (in-package :sudoku-solver-system)
@@ -12,7 +10,7 @@
   :description "Sudoku solver"
   :components
   ((:file "packages")
-   (:file "sudoku-solver" :depends-on ("packages")))
-  :depends-on (iterate))
-	  
-	  
+   (:file "sudoku-puzzle" :depends-on ("packages"))
+   (:file "file-input" :depends-on ("packages" "sudoku-puzzle"))
+   (:file "sudoku-solver" :depends-on ("file-input")))
+  :depends-on (iterate alexandria))
