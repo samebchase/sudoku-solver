@@ -10,13 +10,6 @@
   (with-open-file (stream path-str)
     (loop for line = (read-line stream nil) while line collect line)))
 
-(defun group-into (n list)
-;; Thanks to stassats from #lisp for replacing an ugly recursive version with this one
-  (if (<= n 0) list
-      (loop while list collect
-        (loop repeat n while list
-	   collect (pop list)))))
-
 (defun first-char-alphap (string)
   (alpha-char-p (aref string 0)))
 
@@ -31,6 +24,13 @@
     (dotimes (j 9)
       (format t "~a " (aref (grid sudoku-puzzle) i j))))
   (format t "~%"))
+
+(defun group-into (n list)
+;; Thanks to stassats from #lisp for replacing an ugly recursive version with this one
+  (if (<= n 0) list
+      (loop while list collect
+        (loop repeat n while list
+	   collect (pop list)))))
 
 (defmethod solve ((sudoku-puzzle sudoku-puzzle))
   (grid sudoku-puzzle))
@@ -48,12 +48,18 @@
     (iter outer (for i to 2)
 	  (iter (for j to 2) (for elt = (aref (grid sudoku-puzzle) (+ x i) (+ y j)))
 		(in outer (collect elt))))))
-    
-(defun filled-elements (list)
-  (remove-if #'zerop list))
 
 (defun subgrid-corner-cell (row col)
   (cons (- row (rem row 3)) (- col (rem col 3))))
+
+(defun filled-elements (list)
+  (remove-if #'zerop list))
+
+;; (defun unsolved-cells (grid)
+;;   (with-every-cell (in outer (when (= (aref grid i j) 0) (collect (cons i j))))))
+
+;; (defun filledp (grid)
+;;   (if (= 0 (length (unsolved-cells grid))) t nil))
 
 (mapcar #'solve (loop for string-list in (group-into 9 (remove-if #'first-char-alphap (read-lines *path*)))
 	for puzzle = (make-instance 'sudoku-puzzle) do (row-strings-to-puzzle puzzle string-list)
@@ -74,28 +80,6 @@
 ;; ;; filled-elements-row and filled-elements-col should be implemented
 ;; ;; using with-grid-component as appropriate
 
-;; (defun filled-elements-row (grid i)
-;;   (if (and (<= i 8) (>= i 0))
-;;       (loop for k upto 8
-;; 	 for elt = (aref grid i k)
-;; 	 when (/= elt 0) collect elt) nil))
-
-;; (defun filled-elements-col (grid j)
-;;   (if (and (<= j 8) (>= j 0))
-;;       (loop for k upto 8
-;; 	 for elt = (aref grid k j)
-;; 	 when (/= elt 0) collect elt) nil))
-
-
-;; (defun filled-elements-subgrid (grid i j)
-;;   (let* ((start-cell (subgrid-top-left-corner-cell grid i j))
-;; 	 (x-index (car start-cell))
-;; 	 (y-index (cdr start-cell)))
-;;     (iter outer (for i to 2)
-;; 	  (iter (for j to 2) (for elt = (aref grid (+ x-index i) (+ y-index j)))
-;; 		(when (/= elt 0)
-;; 		  (in outer (collect elt)))))))
-
 ;; (defun grid-to-list (grid)
 ;;   (with-every-cell (in outer (collect (aref grid i j)))))
 
@@ -107,12 +91,6 @@
 
 ;; (defun all-possibilities (grid) 
 ;;   (with-every-cell (collect (cell-possibilities grid i j))))
-
-;; (defun unsolved-cells (grid)
-;;   (with-every-cell (in outer (when (= (aref grid i j) 0) (collect (cons i j))))))
-
-;; (defun filledp (grid)
-;;   (if (= 0 (length (unsolved-cells grid))) t nil))
 
 ;; (defmacro with-every-cell (body)
 ;;   `(iter outer (for i to 8)
