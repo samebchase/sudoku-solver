@@ -6,7 +6,7 @@
 
 (defsystem sudoku-solver
   :name "sudoku-solver"
-  :author "Samuel"
+  :author "Samuel Chase"
   :description "Sudoku solver"
   :components
   ((:file "packages")

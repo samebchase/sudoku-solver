@@ -1,25 +1,12 @@
 (in-package :sudoku-solver)
 
+(defvar *cell-values* (alexandria:iota 9 :start 1))
+
 (defmethod row ((sudoku-puzzle sudoku-puzzle) row)
-  (loop for i upto 8 collect (aref (grid sudoku-puzzle) 0 i)))
-
-(defmethod print-puzzle ((sudoku-puzzle sudoku-puzzle))
-  (dotimes (i 9)
-    (format t "~%")
-    (dotimes (j 9)
-      (format t "~a " (aref (grid sudoku-puzzle) i j))))
-  (format t "~%"))
-
-(defun group-into (n list)
-;; Thanks to stassats from #lisp for replacing an ugly recursive
-;; version with this one
-  (if (<= n 0) list
-      (loop while list collect
-        (loop repeat n while list
-	   collect (pop list)))))
+  (loop for i upto 8 collect (aref (grid sudoku-puzzle) row i)))
 
 (defmethod column ((sudoku-puzzle sudoku-puzzle) col)
-  (loop for i upto 8 collect (aref (grid sudoku-puzzle) i 0)))
+  (loop for j upto 8 collect (aref (grid sudoku-puzzle) j col)))
 
 (defmethod subgrid ((sudoku-puzzle sudoku-puzzle) i j)
   (let* ((corner-cell (subgrid-corner-cell i j))
@@ -32,13 +19,40 @@
 (defun subgrid-corner-cell (row col)
   (cons (- row (rem row 3)) (- col (rem col 3))))
 
-(defun filled-elements (list)
+(defmethod print-puzzle ((sudoku-puzzle sudoku-puzzle))
+  (dotimes (i 9)
+    (format t "~%")
+    (dotimes (j 9)
+      (format t "~a " (aref (grid sudoku-puzzle) i j))))
+  (format t "~%"))
+
+(defun group-into (n list)
+;; Thanks to stassats from #lisp for replacing an ugly recursive
+;; version with one that used loop instead.
+  (if (<= n 0) list
+      (loop while list collect
+        (loop repeat n while list
+	   collect (pop list)))))
+
+(defun filled-values (list)
   (remove-if #'zerop list))
 
 (defmethod populate-unsolved-cells ((sudoku-puzzle sudoku-puzzle))
   (with-every-cell
       (when (zerop (aref (grid sudoku-puzzle) i j))
 	(setf (gethash (cons i j) (unsolved-cells sudoku-puzzle)) (cons i j)))))
+
+(defmethod unsolved ((sudoku-puzzle sudoku-puzzle))
+  (loop for value being the hash-values of (unsolved-cells sudoku-puzzle) collect value))
+
+(defmethod mark-cell-as-solved ((sudoku-puzzle sudoku-puzzle) cell)
+  (remhash cell (unsolved-cells sudoku-puzzle)))
+
+(defmethod row-col-subgrid-possibilities ((sudoku-puzzle sudoku-puzzle) i j)
+  (set-difference *cell-values*
+		  (remove-duplicates (append (subgrid sudoku-puzzle i j)
+					     (row sudoku-puzzle i)
+					     (column sudoku-puzzle j)))))
 
 ;; (defun unsolved-cells (grid)
 ;;   (with-every-cell (in outer (when (= (aref grid i j) 0) (collect (cons i j))))))
@@ -64,15 +78,8 @@
 ;; (defun grid-to-list (grid)
 ;;   (with-every-cell (in outer (collect (aref grid i j)))))
 
-;; (defun cell-possibilities (grid i j)
-;;   (set-difference (loop for i from 1 upto 9 collect i)
-;; 		  (remove-duplicates (append (filled-elements-subgrid grid i j)
-;; 					     (filled-elements-col grid j)
-;; 					     (filled-elements-row grid i)))))
-
 ;; (defun all-possibilities (grid) 
 ;;   (with-every-cell (collect (cell-possibilities grid i j))))
-
 
 ;; (defun all-subgrids (grid)
 ;;   (iter outer (for i to 6 by 3)
