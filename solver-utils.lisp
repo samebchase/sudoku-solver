@@ -26,9 +26,16 @@
 
 (defmethod print-puzzle ((puzzle sudoku-puzzle))
   (dotimes (i 9)
-    (when (or (= i 3) (= i 6)) (format t "~%"))
+    (when (or (= i 3) (= i 6))
+      (loop for i upto 20 do
+	   (if (or (= i 6) (= i 14))
+	       (format t "+") (format t "-"))
+	 finally (format t "~%")))
+    ;; stassats from #lisp sez: (format t "~v,,,'-<~>" 10)
+    ;; or (format t "~v@{~a~:*~}" 10 "-")
     (dotimes (j 9)
-      (when (or (= j 3) (= j 6)) (format t " "))
+      (when (or (= j 3) (= j 6)) (format t "| "))
+      ;; arcane magic follows mwahahahahaaaa...
       (format t "~[.~:;~:*~d~] " (aref (grid puzzle) i j)))
     (format t "~%")))
 
