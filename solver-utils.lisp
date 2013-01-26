@@ -29,19 +29,19 @@
     (when (or (= i 3) (= i 6))
       (loop for i upto 20 do
 	   (if (or (= i 6) (= i 14))
-	       (format t "+") (format t "-"))
+	       (format t "+")
+	       (format t "-"))
 	 finally (format t "~%")))
-    ;; stassats from #lisp sez: (format t "~v,,,'-<~>" 10)
-    ;; or (format t "~v@{~a~:*~}" 10 "-")
     (dotimes (j 9)
       (when (or (= j 3) (= j 6)) (format t "| "))
-      ;; arcane magic follows mwahahahahaaaa...
+      ;; Prints a "." when zero, prints the number otherwise
       (format t "~[.~:;~:*~d~] " (aref (grid puzzle) i j)))
-    (format t "~%")))
+    (format t "~%"))
+  (format t "~%"))
 
 (defun group-into (n list)
   ;; Thanks to stassats from #lisp for replacing an ugly recursive
-  ;; version with one that used loop instead.
+  ;; version with this one.
   (if (<= n 0) list
       (loop while list collect
 	   (loop repeat n while list
