@@ -2,57 +2,60 @@
 
 (defvar *cell-values* (alexandria:iota 9 :start 1))
 
-(defmethod row ((sudoku-puzzle sudoku-puzzle) row)
-  (loop for i upto 8 collect (aref (grid sudoku-puzzle) row i)))
+(defmacro with-every-cell (body)
+  `(iter outer (for i to 8)
+	 (iter (for j to 8)
+	       (in outer ,body))))
 
-(defmethod column ((sudoku-puzzle sudoku-puzzle) col)
-  (loop for j upto 8 collect (aref (grid sudoku-puzzle) j col)))
+(defmethod row ((puzzle sudoku-puzzle) row)
+  (loop for i upto 8 collect (aref (grid puzzle) row i)))
 
-(defmethod subgrid ((sudoku-puzzle sudoku-puzzle) i j)
-  (let* ((corner-cell (subgrid-corner-cell i j))
-	 (x (car corner-cell))
-	 (y (cdr corner-cell)))
-    (iter outer (for i to 2)
-	  (iter (for j to 2) (for elt = (aref (grid sudoku-puzzle) (+ x i) (+ y j)))
+(defmethod column ((puzzle sudoku-puzzle) col)
+  (loop for j upto 8 collect (aref (grid puzzle) j col)))
+
+(defmethod subgrid ((puzzle sudoku-puzzle) i j)
+  (multiple-value-bind (x y) (subgrid-corner-cell i j)
+    (iter outer (for i to 2) 
+	  (iter (for j to 2)
+		(for elt = (aref (grid puzzle) (+ x i) (+ y j)))
 		(in outer (collect elt))))))
 
 (defun subgrid-corner-cell (row col)
-  (cons (- row (rem row 3)) (- col (rem col 3))))
+  (values (- row (rem row 3))
+	  (- col (rem col 3))))
 
-(defmethod print-puzzle ((sudoku-puzzle sudoku-puzzle))
+(defmethod print-puzzle ((puzzle sudoku-puzzle))
   (dotimes (i 9)
-    (format t "~%")
+    (when (or (= i 3) (= i 6)) (format t "~%"))
     (dotimes (j 9)
-      (format t "~a " (aref (grid sudoku-puzzle) i j))))
-  (format t "~%"))
+      (when (or (= j 3) (= j 6)) (format t " "))
+      (format t "~[.~:;~:*~d~] " (aref (grid puzzle) i j)))
+    (format t "~%")))
 
 (defun group-into (n list)
-;; Thanks to stassats from #lisp for replacing an ugly recursive
-;; version with one that used loop instead.
+  ;; Thanks to stassats from #lisp for replacing an ugly recursive
+  ;; version with one that used loop instead.
   (if (<= n 0) list
       (loop while list collect
-        (loop repeat n while list
-	   collect (pop list)))))
+	   (loop repeat n while list
+	      collect (pop list)))))
 
 (defun filled-values (list)
   (remove-if #'zerop list))
 
-(defmethod populate-unsolved-cells ((sudoku-puzzle sudoku-puzzle))
+(defmethod populate-unsolved-cells ((puzzle sudoku-puzzle))
   (with-every-cell
-      (when (zerop (aref (grid sudoku-puzzle) i j))
-	(setf (gethash (cons i j) (unsolved-cells sudoku-puzzle)) (cons i j)))))
+      (when (zerop (aref (grid puzzle) i j))
+	(push (cons i j) (unsolved-cells puzzle)))))
 
-(defmethod unsolved ((sudoku-puzzle sudoku-puzzle))
-  (loop for value being the hash-values of (unsolved-cells sudoku-puzzle) collect value))
+(defmethod mark-cell-as-solved ((puzzle sudoku-puzzle) cell)
+  (remove cell (unsolved-cells puzzle)))
 
-(defmethod mark-cell-as-solved ((sudoku-puzzle sudoku-puzzle) cell)
-  (remhash cell (unsolved-cells sudoku-puzzle)))
-
-(defmethod row-col-subgrid-possibilities ((sudoku-puzzle sudoku-puzzle) i j)
+(defmethod row-col-subgrid-possibilities ((puzzle sudoku-puzzle) i j)
   (set-difference *cell-values*
-		  (remove-duplicates (append (subgrid sudoku-puzzle i j)
-					     (row sudoku-puzzle i)
-					     (column sudoku-puzzle j)))))
+		  (remove-duplicates (append (subgrid puzzle i j)
+					     (row puzzle i)
+					     (column puzzle j)))))
 
 ;; (defun unsolved-cells (grid)
 ;;   (with-every-cell (in outer (when (= (aref grid i j) 0) (collect (cons i j))))))
