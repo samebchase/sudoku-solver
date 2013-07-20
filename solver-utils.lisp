@@ -3,9 +3,17 @@
 (defvar *cell-values* (alexandria:iota 9 :start 1))
 
 (defmacro with-every-cell (body)
-  `(iter outer (for i to 8)
-	 (iter (for j to 8)
+  `(nested-loop row 8 col 8 ,body))
+
+(defmacro nested-loop (i i-end j j-end body)
+  `(iter outer (for i to ,i-end)
+	 (iter (for j to ,j-end)
 	       (in outer ,body))))
+
+(defun cross-product (a b)
+  (iter outer (for i in-sequence a)
+	(iter (for j in-sequence b) 
+	      (in outer (collect (format nil "~a~a" i j))))))
 
 (defmethod row ((puzzle sudoku-puzzle) row)
   (loop for i upto 8 collect (aref (grid puzzle) row i)))
@@ -34,7 +42,7 @@
 	 finally (format t "~%")))
     (dotimes (j 9)
       (when (or (= j 3) (= j 6)) (format t "| "))
-      ;; Prints a "." when zero, prints the number otherwise
+      ;; Prints a "." when zero, prints the number otherwise.
       (format t "~[.~:;~:*~d~] " (aref (grid puzzle) i j)))
     (format t "~%"))
   (format t "~%"))
@@ -60,9 +68,10 @@
 
 (defmethod row-col-subgrid-possibilities ((puzzle sudoku-puzzle) i j)
   (set-difference *cell-values*
-		  (remove-duplicates (append (subgrid puzzle i j)
-					     (row puzzle i)
-					     (column puzzle j)))))
+		  (remove-duplicates
+		   (append (subgrid puzzle i j)
+			   (row puzzle i)
+			   (column puzzle j)))))
 
 ;; (defun unsolved-cells (grid)
 ;;   (with-every-cell (in outer (when (= (aref grid i j) 0) (collect (cons i j))))))
