@@ -1,32 +1,34 @@
 (in-package :sudoku-solver)
 
 (defclass sudoku-puzzle ()
-  ((grid :accessor grid :initform (make-array '(9 9)))
-   (unsolved-cells :accessor unsolved-cells :initform '())))
+  ((grid :accessor grid :initform (make-array '(9 9)))))
 
-(defgeneric row (puzzle row)
-  (:documentation "Gets the row of the matrix"))
+(defun row (puzzle row)
+  (loop for i upto 8 collect (aref (grid puzzle) row i)))
 
-(defgeneric column (puzzle column)
-  (:documentation "Gets the column of the matrix"))
+(defun column (puzzle col)
+  (loop for j upto 8 collect (aref (grid puzzle) j col)))
 
-(defgeneric subgrid (puzzle row col)
-  (:documentation "Gets the column of the matrix"))
+(defun subgrid (puzzle i j)
+  (multiple-value-bind (x y) (subgrid-corner-cell i j)
+    (iter outer (for i to 2) 
+	  (iter (for j to 2)
+		(for elt = (aref (grid puzzle) (+ x i) (+ y j)))
+		(in outer (collect elt))))))
 
-(defgeneric solve (puzzle)
-  (:documentation "Solves the puzzle."))
-
-(defgeneric row-strings-to-puzzle (puzzle list)
-  (:documentation "Takes a list of eight strings and initialises the grid"))
-
-(defgeneric print-puzzle (puzzle)
-  (:documentation "Prints the puzzle."))
-
-(defgeneric populate-unsolved-cells (puzzle)
-  (:documentation "Populates the hash-table."))
-
-(defgeneric mark-cell-as-solved (puzzle cell)
-  (:documentation "Removes cell from unsolved list."))
-
-(defgeneric row-col-subgrid-possibilities (puzzle i j)
-  (:documentation "All possibilities from the row, column and subgrid of the cell."))
+(defmethod print-object ((puzzle sudoku-puzzle) stream)
+  (print-unreadable-object (puzzle stream :type t :identity t)
+    (terpri)
+    (dotimes (i 9)
+      (when (or (= i 3) (= i 6))
+        (loop for i upto 20 do
+             (if (or (= i 6) (= i 14))
+                 (format t "+")
+                 (format t "-"))
+           finally (format t "~%")))
+      (dotimes (j 9)
+        (when (or (= j 3) (= j 6)) (format t "| "))
+        ;; Prints a "." when zero, prints the number otherwise.
+        (format t "~[.~:;~:*~d~] " (aref (grid puzzle) i j)))
+      (terpri))
+    (terpri)))

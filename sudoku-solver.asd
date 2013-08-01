@@ -1,5 +1,3 @@
-;;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Base: 10 -*-
-
 (defpackage #:sudoku-solver-system (:use :cl :asdf))
 
 (in-package :sudoku-solver-system)
@@ -8,10 +6,11 @@
   :name "sudoku-solver"
   :author "Samuel Chase"
   :description "Sudoku solver"
+  :serial t
   :components
-  ((:file "packages")
-   (:file "sudoku-puzzle" :depends-on ("packages"))
-   (:file "file-input" :depends-on ("sudoku-puzzle"))
-   (:file "solver-utils" :depends-on ("sudoku-puzzle"))
-   (:file "sudoku-solver" :depends-on ("file-input" "solver-utils")))
+  ((:file "package")
+   (:file "utils")
+   (:file "file-input")
+   (:file "sudoku-puzzle")
+   (:file "sudoku-solver"))
   :depends-on (iterate alexandria))
