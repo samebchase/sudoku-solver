@@ -13,4 +13,11 @@
    (:file "file-input")
    (:file "sudoku-puzzle")
    (:file "sudoku-solver"))
-  :depends-on (iterate alexandria))
+  :depends-on (iterate alexandria)
+  :in-order-to ((test-op (test-op sudoku-solver-test))))
+
+(defsystem sudoku-solver-test
+  :components
+  ((:file "test"))
+  :depends-on (sudoku-solver fiveam))
+

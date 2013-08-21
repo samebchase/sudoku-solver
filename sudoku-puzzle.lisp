@@ -1,7 +1,8 @@
 (in-package :sudoku-solver)
 
 (defclass sudoku-puzzle ()
-  ((grid :accessor grid :initform (make-array '(9 9)))))
+  ((grid :accessor grid
+         :initform (make-array '(9 9)))))
 
 (defun row (puzzle row)
   (loop for i upto 8 collect (aref (grid puzzle) row i)))
