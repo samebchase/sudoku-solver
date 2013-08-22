@@ -17,6 +17,16 @@
 		(for elt = (aref (grid puzzle) (+ x i) (+ y j)))
 		(in outer (collect elt))))))
 
+(defun subgrid (puzzle i j)
+  (multiple-value-bind (x y) (subgrid-corner-cell i j)
+    (loop
+       for i to 2
+       nconc
+       (loop
+          for j to 2
+          for elt = (aref (grid puzzle) (+ x i) (+ y j))
+          collect elt))))
+
 (defmethod print-object ((puzzle sudoku-puzzle) stream)
   (print-unreadable-object (puzzle stream :type t :identity t)
     (terpri)

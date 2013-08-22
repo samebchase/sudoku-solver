@@ -1,4 +1,4 @@
 (in-package :cl-user)
 
 (defpackage :sudoku-solver
-  (:use :cl :iterate :alexandria :fiveam))
+  (:use :cl :alexandria :fiveam))

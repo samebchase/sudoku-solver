@@ -2,6 +2,8 @@
 
 (defparameter *euler-puzzles-path* "puzzles/euler-puzzles.txt")
 
+(defparameter *sudoku-values* (iota 9 :start 1))
+
 (defmethod solve (puzzle)
   puzzle)
 
