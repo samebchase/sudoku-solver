@@ -12,13 +12,6 @@
 
 (defun subgrid (puzzle i j)
   (multiple-value-bind (x y) (subgrid-corner-cell i j)
-    (iter outer (for i to 2) 
-	  (iter (for j to 2)
-		(for elt = (aref (grid puzzle) (+ x i) (+ y j)))
-		(in outer (collect elt))))))
-
-(defun subgrid (puzzle i j)
-  (multiple-value-bind (x y) (subgrid-corner-cell i j)
     (loop
        for i to 2
        nconc
@@ -26,6 +19,18 @@
           for j to 2
           for elt = (aref (grid puzzle) (+ x i) (+ y j))
           collect elt))))
+
+(defun row-peers (puzzle i j)
+  (let ((row-peers (remove 0 (row puzzle i))))
+    (remove (aref (grid puzzle) i j) row-peers)))
+
+(defun column-peers (puzzle i j)
+  (let ((column-peers (remove 0 (column puzzle j))))
+    (remove (aref (grid puzzle) i j) column-peers)))
+
+(defun subgrid-peers (puzzle i j)
+  (let ((subgrid-peers (remove 0 (subgrid puzzle i j))))
+    (remove (aref (grid puzzle) i j) subgrid-peers)))
 
 (defmethod print-object ((puzzle sudoku-puzzle) stream)
   (print-unreadable-object (puzzle stream :type t :identity t)
@@ -43,3 +48,9 @@
         (format t "~[.~:;~:*~d~] " (aref (grid puzzle) i j)))
       (terpri))
     (terpri)))
+
+(defun make-sudoku-puzzle (2D-array)
+  (let ((puzzle (make-instance 'sudoku-puzzle)))
+    (setf (grid puzzle)
+          2D-array)
+    puzzle))
